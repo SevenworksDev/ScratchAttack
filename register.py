@@ -1,7 +1,6 @@
-# used some selenium recorder script and modified stuff
-
-import random, string
+import random, string, sys, time
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -16,14 +15,18 @@ def generate_email(email):
     return f"{username}+{haha(6)}@{domain}"
 
 class Browser():
-    def __init__(self):
-        self.driver = webdriver.Chrome()
+    def __init__(self, headless=True):
+        chrome_options = Options()
+        if headless:
+            chrome_options.add_argument('--headless')
+
+        self.driver = webdriver.Chrome(options=chrome_options)
         self.vars = {}
 
-    def teardown_method(self):
-        self.driver.quit()
-
     def scratch(self):
+        username = haha(10)
+        password = haha(10)
+
         self.driver.get("https://scratch.mit.edu/join")
         self.driver.set_window_size(1285, 765)
         
@@ -55,6 +58,11 @@ class Browser():
         actions = ActionChains(self.driver)
         self.driver.find_element(By.ID, "email").send_keys(generate_email(shit))
         self.wait_and_click(By.CSS_SELECTOR, ".next-step-title")
+        time.sleep(7)
+        print(f"Account {username} created.")
+        with open('accounts.txt', 'a') as file:
+            file.write(f"{username} / {password}\n")
+            file.close()
 
     def wait_and_click(self, by, value):
         WebDriverWait(self.driver, 10).until(
@@ -66,14 +74,7 @@ class Browser():
             EC.presence_of_element_located((by, value))
         ).send_keys(keys)
 
-username = haha(10)
-password = haha(10)
-shit = input("E-mail: ")
-
-dang = Browser()
+shit = input("Gmail Address: ")
+dang = Browser(headless=False)
 dang.scratch()
-dang.down()
-
-with open('accounts.txt', 'w') as file:
-    file.write(f'{username} / {password}')
-    file.close()
+sys.exit()
